@@ -189,6 +189,39 @@ export function column_getPinnedIndex<
     : 0
 }
 
+// Header APIs
+
+/**
+ * Reads the pinned region of this header's own leaf columns.
+ *
+ * A group column split across regions renders one header per region, so its
+ * column reports a single position. The header only spans its own leaves:
+ * returns their shared position, or `false` when they are unpinned or mixed.
+ *
+ * @example
+ * ```ts
+ * const position = header_getIsPinned(header)
+ * ```
+ */
+export function header_getIsPinned<
+  TFeatures extends TableFeatures,
+  TData extends RowData,
+  TValue extends CellData = CellData,
+>(header: Header<TFeatures, TData, TValue>): ColumnPinningPosition {
+  const leafHeaders = header.getLeafHeaders()
+  if (!leafHeaders.length) {
+    return false
+  }
+
+  const position = column_getIsPinned(leafHeaders[0]!.column)
+  for (let i = 1; i < leafHeaders.length; i++) {
+    if (column_getIsPinned(leafHeaders[i]!.column) !== position) {
+      return false
+    }
+  }
+  return position
+}
+
 // Row APIs
 
 /**
