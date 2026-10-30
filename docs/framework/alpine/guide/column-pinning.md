@@ -215,19 +215,19 @@ Because Alpine does not initialize directives inside content set with `x-html`, 
   <template x-if="!header.isPlaceholder && header.column.getCanPin()">
     <div class="pin-actions">
       <button
-        x-show="header.column.getIsPinned() !== 'start'"
+        x-show="header.getIsPinned() !== 'start'"
         @click="header.column.pin('start')"
       >
         &lt;=
       </button>
       <button
-        x-show="header.column.getIsPinned()"
+        x-show="header.getIsPinned()"
         @click="header.column.pin(false)"
       >
         X
       </button>
       <button
-        x-show="header.column.getIsPinned() !== 'end'"
+        x-show="header.getIsPinned() !== 'end'"
         @click="header.column.pin('end')"
       >
         =&gt;

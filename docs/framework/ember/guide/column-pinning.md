@@ -203,20 +203,26 @@ Use `table.getIsSomeColumnsPinned()` to check if any columns are pinned, or pass
 Because Ember templates extract method references without binding them, wrap these Column and Table method calls in small module-scope helper functions (or getters), then call the helpers from your markup:
 
 ```ts
-import { type Column, type ColumnPinningPosition } from '@tanstack/ember-table'
+import {
+  type Column,
+  type ColumnPinningPosition,
+  type Header,
+} from '@tanstack/ember-table'
 
 const getCanPin = (column: Column<typeof features, Person>): boolean =>
   column.getCanPin()
 
+// Read pin state from the header, so a group split across pinned regions
+// reports the region this header is rendered in
 const getIsPinned = (
-  column: Column<typeof features, Person>,
-): ColumnPinningPosition => column.getIsPinned()
+  header: Header<typeof features, Person>,
+): ColumnPinningPosition => header.getIsPinned()
 
-const isPinnedStart = (column: Column<typeof features, Person>): boolean =>
-  column.getIsPinned() === 'start'
+const isPinnedStart = (header: Header<typeof features, Person>): boolean =>
+  header.getIsPinned() === 'start'
 
-const isPinnedEnd = (column: Column<typeof features, Person>): boolean =>
-  column.getIsPinned() === 'end'
+const isPinnedEnd = (header: Header<typeof features, Person>): boolean =>
+  header.getIsPinned() === 'end'
 
 const pin = (
   column: Column<typeof features, Person>,
@@ -229,19 +235,19 @@ const pin = (
 ```hbs
 {{#if (getCanPin header.column)}}
   <div class='pin-actions'>
-    {{#unless (isPinnedStart header.column)}}
+    {{#unless (isPinnedStart header)}}
       <button
         class='pin-button'
         {{on 'click' (pin header.column 'start')}}
       >◀</button>
     {{/unless}}
-    {{#if (getIsPinned header.column)}}
+    {{#if (getIsPinned header)}}
       <button
         class='pin-button'
         {{on 'click' (pin header.column false)}}
       >✕</button>
     {{/if}}
-    {{#unless (isPinnedEnd header.column)}}
+    {{#unless (isPinnedEnd header)}}
       <button
         class='pin-button'
         {{on 'click' (pin header.column 'end')}}
