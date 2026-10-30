@@ -220,10 +220,7 @@ Because Alpine does not initialize directives inside content set with `x-html`, 
       >
         &lt;=
       </button>
-      <button
-        x-show="header.getIsPinned()"
-        @click="header.column.pin(false)"
-      >
+      <button x-show="header.getIsPinned()" @click="header.column.pin(false)">
         X
       </button>
       <button
