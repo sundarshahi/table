@@ -326,8 +326,79 @@ describe('header_getIsPinned', () => {
     const table = makeSplitGroupTable()
     const groupHeader = table.getHeaderGroups()[0]!.headers[0]!
 
-    expect(groupHeader.getLeafHeaders()).toHaveLength(3)
+    expect(groupHeader.subHeaders).toHaveLength(3)
     expect(header_getIsPinned(groupHeader)).toBe(false)
+  })
+
+  it('should report the region of a group split start/end with no center leaves', () => {
+    const columns: Array<ColumnDef<typeof features, Person, any>> = [
+      {
+        id: 'name',
+        columns: [
+          { accessorKey: 'firstName', id: 'firstName' },
+          { accessorKey: 'lastName', id: 'lastName' },
+        ],
+      },
+      { accessorKey: 'age', id: 'age' },
+    ]
+    const table = constructTable<typeof features, Person>({
+      features,
+      columns,
+      data: generateTestData(1),
+      initialState: {
+        columnPinning: {
+          start: ['firstName'],
+          end: ['lastName'],
+        },
+      },
+    })
+    const startGroup = table_getStartHeaderGroups(table)[0]!.headers[0]!
+    const endGroup = table_getEndHeaderGroups(table)[0]!.headers[0]!
+
+    expect(startGroup.column.id).toBe('name')
+    expect(endGroup.column.id).toBe('name')
+    expect(header_getIsPinned(startGroup)).toBe('start')
+    expect(header_getIsPinned(endGroup)).toBe('end')
+  })
+
+  it('should read only leaf columns through nested group headers', () => {
+    const columns: Array<ColumnDef<typeof features, Person, any>> = [
+      {
+        id: 'outer',
+        columns: [
+          {
+            id: 'inner',
+            columns: [
+              { accessorKey: 'firstName', id: 'firstName' },
+              { accessorKey: 'lastName', id: 'lastName' },
+            ],
+          },
+          { accessorKey: 'age', id: 'age' },
+        ],
+      },
+    ]
+    const table = constructTable<typeof features, Person>({
+      features,
+      columns,
+      data: generateTestData(1),
+      initialState: {
+        columnPinning: {
+          start: ['firstName'],
+          end: ['lastName', 'age'],
+        },
+      },
+    })
+    const endGroups = table_getEndHeaderGroups(table)
+    const endOuter = endGroups[0]!.headers[0]!
+    const endInner = endGroups[1]!.headers[0]!
+
+    expect(endOuter.column.id).toBe('outer')
+    expect(endInner.column.id).toBe('inner')
+    expect(header_getIsPinned(endOuter)).toBe('end')
+    expect(header_getIsPinned(endInner)).toBe('end')
+    expect(
+      header_getIsPinned(table_getStartHeaderGroups(table)[0]!.headers[0]!),
+    ).toBe('start')
   })
 
   it('should match the column for leaf headers', () => {
